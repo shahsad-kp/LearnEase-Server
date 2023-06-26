@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
 
-from ClassRoom.models import ClassRoom
+from ClassRoom.models import ClassRoom, Participants
 from ClassRoom.serializers import ClassRoomSerializer, TopicSerializer
 
 
@@ -21,8 +21,8 @@ class CreateClassRoom(APIView):
 
         serializer = ClassRoomSerializer(data=data)
         if serializer.is_valid():
-            classroom = serializer.save(lecturer_id=request.user.pk)
-
+            classroom = serializer.save()
+            Participants.objects.create(room=classroom, user=request.user, is_lecturer=True)
             for topic_data in topics_data:
                 topic_data['class_room'] = classroom.id
                 topic_serializer = TopicSerializer(data=topic_data)
@@ -42,7 +42,7 @@ class GetClassRoom(APIView):
         if not classroom:
             return Response(status=HTTP_400_BAD_REQUEST)
 
-        if not (classroom.lecturer == request.user or request.user in classroom.students.all()):
+        if not Participants.objects.filter(room=classroom, user=request.user).exists():
             return Response(status=HTTP_400_BAD_REQUEST)
 
         serializer = self.serializer_class(classroom)
@@ -58,7 +58,7 @@ class GetTopics(APIView):
         if not classroom:
             return Response(status=HTTP_400_BAD_REQUEST)
 
-        if not (classroom.lecturer == request.user or request.user in classroom.students.all()):
+        if not Participants.objects.filter(room=classroom, user=request.user).exists():
             return Response(status=HTTP_400_BAD_REQUEST)
 
         topics = classroom.topics.all()
@@ -72,9 +72,7 @@ class GetHistory(APIView):
 
     def get(self, request):
         last_week = datetime.today() - timedelta(days=7)
-        classrooms = ClassRoom.objects.filter(
-            Q(lecturer=request.user, created_at__gte=last_week) |
-            Q(students=request.user, created_at__gte=last_week)
-        ).filter(created_at__gte=last_week)
+        participates = request.user.participated_rooms.select_related('room').filter(room__created_at__gte=last_week)
+        classrooms = [participate.room for participate in participates]
         serializer = self.serializer_class(classrooms, many=True)
         return Response(serializer.data)

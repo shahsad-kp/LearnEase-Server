@@ -4,30 +4,33 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
 @sync_to_async
 def add_participant(class_room_id: int, user_id: int):
-    from ClassRoom.models import ClassRoom
+    from ClassRoom.models import ClassRoom, Participants
+    from ClassRoom.serializers import ParticipantSerializer
     try:
         class_room = ClassRoom.objects.get(id=class_room_id)
     except ClassRoom.DoesNotExist:
         raise KeyError('ClassRoom does not exist')
-    if (class_room.lecturer_id == user_id) or (user_id in class_room.students.all()):
-        return
-    print(user_id)
-    class_room.students.add(user_id)
-    class_room.save()
+    participant = class_room.participants.filter(user_id=user_id).first()
+    if participant:
+        return ParticipantSerializer(participant).data
+    participant = Participants.objects.create(user_id=user_id, room_id=class_room_id)
+    participant.save()
+    return ParticipantSerializer(participant).data
 
 
 @sync_to_async
 def remove_participant(class_room_id: int, user_id: int):
     from ClassRoom.models import ClassRoom
-    from ClassRoom.serializers import ClassRoomSerializer
     try:
         class_room = ClassRoom.objects.get(id=class_room_id)
     except ClassRoom.DoesNotExist:
         raise KeyError('ClassRoom does not exist')
-    if (class_room.lecturer_id != user_id) and (user_id not in class_room.students.all()):
-        return ClassRoomSerializer(class_room).data
-    class_room.students.remove(user_id)
-    class_room.save()
+    participant = class_room.participants.filter(user_id=user_id).first()
+    if not participant:
+        return
+    if participant.is_lecturer:
+        return
+    participant.delete()
 
 
 class ClassRoomConsumer(AsyncJsonWebsocketConsumer):
@@ -47,17 +50,15 @@ class ClassRoomConsumer(AsyncJsonWebsocketConsumer):
         self.user = self.scope['user']
 
         try:
-            await add_participant(self.class_room_id, self.user.id)
+            participant = await add_participant(self.class_room_id, self.user.id)
         except KeyError:
             await self.close(code=404)
             return
-
-        from Users.serializers import UserSerializer
         await self.channel_layer.group_send(
             self.chat_room_group_name,
             {
                 'type': 'join_student',
-                'student': UserSerializer(self.user).data,
+                'student': participant,
             }
         )
         await self.channel_layer.group_add(
@@ -77,7 +78,15 @@ class ClassRoomConsumer(AsyncJsonWebsocketConsumer):
                 'student_id': self.user.id,
             }
         )
-        await remove_participant(self.class_room_id, self.user.id)
+        await self.channel_layer.group_discard(
+            self.chat_room_group_name,
+            self.channel_name,
+        )
+        try:
+            await remove_participant(self.class_room_id, self.user.id)
+        except KeyError:
+            pass
+        await self.close(code=404)
 
     async def receive_json(self, content, **kwargs):
         message = content.get('message')
