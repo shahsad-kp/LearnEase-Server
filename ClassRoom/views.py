@@ -1,3 +1,6 @@
+from datetime import datetime, timedelta, date
+
+from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -60,4 +63,18 @@ class GetTopics(APIView):
 
         topics = classroom.topics.all()
         serializer = self.serializer_class(topics, many=True)
+        return Response(serializer.data)
+
+
+class GetHistory(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ClassRoomSerializer
+
+    def get(self, request):
+        last_week = datetime.today() - timedelta(days=7)
+        classrooms = ClassRoom.objects.filter(
+            Q(lecturer=request.user, created_at__gte=last_week) |
+            Q(students=request.user, created_at__gte=last_week)
+        ).filter(created_at__gte=last_week)
+        serializer = self.serializer_class(classrooms, many=True)
         return Response(serializer.data)
