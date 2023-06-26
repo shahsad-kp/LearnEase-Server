@@ -6,6 +6,7 @@ from Users.models import User
 
 class UserSerializer(ModelSerializer):
     profilePicture = SerializerMethodField()
+
     class Meta:
         model = User
         fields = ['id', 'name', 'email', 'password', 'profilePicture']
