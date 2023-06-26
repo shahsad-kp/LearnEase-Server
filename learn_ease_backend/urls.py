@@ -24,6 +24,7 @@ urlpatterns = [
     path('api/auth/', include(('Auth.urls', 'Auth'), namespace='Auth')),
     path('api/user/', include(('Users.urls', 'Users'), namespace='Users')),
     path('api/classroom/', include(('ClassRoom.urls', 'ClassRoom'), namespace='ClassRoom')),
+    path('api/messages/', include(('Messages.urls', 'Messages'), namespace='Messages')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

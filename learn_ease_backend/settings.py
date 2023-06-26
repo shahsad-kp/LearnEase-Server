@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'Auth.apps.AuthConfig',
     'Users.apps.UsersConfig',
     'ClassRoom.apps.ClassroomConfig',
+    'Messages.apps.MessagesConfig',
 ]
 
 MIDDLEWARE = [
