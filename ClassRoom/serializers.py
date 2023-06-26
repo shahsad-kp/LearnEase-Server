@@ -34,19 +34,23 @@ class ParticipantSettingsSerializer(ModelSerializer):
 
 class ParticipantSerializer(ModelSerializer):
     name = SerializerMethodField()
-    profile_picture = SerializerMethodField()
+    profilePicture = SerializerMethodField()
     email = SerializerMethodField()
     settings = SerializerMethodField()
+    id = SerializerMethodField()
 
     class Meta:
         model = Participants
-        fields = ['id', 'name', 'profile_picture', 'email', 'settings']
+        fields = ['id', 'name', 'profilePicture', 'email', 'settings']
+
+    def get_id(self, obj):
+        return obj.user.id
 
     def get_name(self, obj):
         return obj.user.name
 
-    def get_profile_picture(self, obj):
-        return obj.user.profile_pic.url() if obj.user.profile_pic else None
+    def get_profilePicture(self, obj):
+        return obj.user.profile_pic.url if obj.user.profile_pic else None
 
     def get_email(self, obj):
         return obj.user.email
