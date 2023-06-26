@@ -52,16 +52,12 @@ class ClassRoomConsumer(AsyncJsonWebsocketConsumer):
             await self.close(code=404)
             return
 
+        from Users.serializers import UserSerializer
         await self.channel_layer.group_send(
             self.chat_room_group_name,
             {
                 'type': 'join_student',
-                'user': {
-                    'id': self.user.id,
-                    'name': self.user.name,
-                    'email': self.user.email,
-                    'profile_pic': self.user.profile_pic.url if self.user.profile_pic else None,
-                }
+                'student': UserSerializer(self.user).data,
             }
         )
         await self.channel_layer.group_add(
@@ -71,17 +67,17 @@ class ClassRoomConsumer(AsyncJsonWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, event):
-        await self.channel_layer.group_discard(
-            self.chat_room_group_name,
-            self.channel_name
-        )
-        self.channel_layer.group_send(
+        if not self.user:
+            return
+
+        await self.channel_layer.group_send(
             self.chat_room_group_name,
             {
                 'type': 'leave_student',
-                'user_id': self.user.id,
+                'student_id': self.user.id,
             }
         )
+        await remove_participant(self.class_room_id, self.user.id)
 
     async def receive_json(self, content, **kwargs):
         message = content.get('message')
@@ -99,7 +95,7 @@ class ClassRoomConsumer(AsyncJsonWebsocketConsumer):
         await self.send_json(
             {
                 'type': 'join_student',
-                'user': event['user']
+                'student': event['student']
             }
         )
 
@@ -107,6 +103,6 @@ class ClassRoomConsumer(AsyncJsonWebsocketConsumer):
         await self.send_json(
             {
                 'type': 'leave_student',
-                'user_id': event['user_id']
+                'student_id': event['student_id']
             }
         )
