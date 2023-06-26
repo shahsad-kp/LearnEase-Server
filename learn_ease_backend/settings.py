@@ -35,17 +35,20 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
     'Auth.apps.AuthConfig',
     'Users.apps.UsersConfig',
+    'ClassRoom.apps.ClassroomConfig',
 ]
 
 MIDDLEWARE = [
@@ -77,7 +80,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'learn_ease_backend.wsgi.application'
+# WSGI_APPLICATION = 'learn_ease_backend.wsgi.application'
+ASGI_APPLICATION = 'learn_ease_backend.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -148,3 +152,9 @@ AUTH_USER_MODEL = 'Users.User'
 # Media files
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}

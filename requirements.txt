@@ -10,3 +10,6 @@ psycopg2-binary==2.9.6
 djangorestframework-simplejwt==5.2.2
 Pillow==9.5.0
 django-cors-headers==4.1.0
+channels==4.0.0
+daphne==4.0.0
+channels-redis==4.1.0
