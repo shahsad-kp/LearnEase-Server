@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'ClassRoom.apps.ClassroomConfig',
     'Messages.apps.MessagesConfig',
     'Documents.apps.DocumentsConfig',
+    'Whiteboard.apps.WhiteboardConfig',
 ]
 
 MIDDLEWARE = [
