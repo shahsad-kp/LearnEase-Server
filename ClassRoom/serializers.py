@@ -38,10 +38,11 @@ class ParticipantSerializer(ModelSerializer):
     email = SerializerMethodField()
     settings = SerializerMethodField()
     id = SerializerMethodField()
+    isActive = SerializerMethodField()
 
     class Meta:
         model = Participants
-        fields = ['id', 'name', 'profilePicture', 'email', 'settings']
+        fields = ['id', 'name', 'profilePicture', 'isActive', 'email', 'settings']
 
     def get_id(self, obj):
         return obj.user.id
@@ -58,6 +59,9 @@ class ParticipantSerializer(ModelSerializer):
     def get_settings(self, obj: Participants):
         settings = obj.settings
         return ParticipantSettingsSerializer(settings).data
+
+    def get_isActive(self, obj):
+        return obj.is_active
 
 
 class ClassRoomSerializer(ModelSerializer):

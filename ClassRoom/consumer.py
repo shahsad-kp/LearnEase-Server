@@ -11,7 +11,11 @@ def add_participant(class_room_id: int, user_id: int):
     except ClassRoom.DoesNotExist:
         raise KeyError('ClassRoom does not exist')
     participant = class_room.participants.filter(user_id=user_id).first()
-    if participant:
+    if participant and participant.is_active:
+        return ParticipantSerializer(participant).data
+    elif participant:
+        participant.is_active = True
+        participant.save()
         return ParticipantSerializer(participant).data
     participant = Participants.objects.create(user_id=user_id, room_id=class_room_id)
     participant.save()
@@ -28,9 +32,8 @@ def remove_participant(class_room_id: int, user_id: int):
     participant = class_room.participants.filter(user_id=user_id).first()
     if not participant:
         return
-    if participant.is_lecturer:
-        return
-    participant.delete()
+    participant.is_active = False
+    participant.save()
 
 
 @sync_to_async

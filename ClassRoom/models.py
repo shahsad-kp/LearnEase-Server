@@ -25,6 +25,7 @@ class Topic(models.Model):
 class Participants(models.Model):
     room = models.ForeignKey(ClassRoom, on_delete=models.CASCADE, related_name='participants')
     user = models.ForeignKey('Users.User', on_delete=models.CASCADE, related_name='participated_rooms')
+    is_active = models.BooleanField(default=True)
     is_lecturer = models.BooleanField(default=False)
     joined_at = models.DateTimeField(auto_now_add=True)
 

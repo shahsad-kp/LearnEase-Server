@@ -49,7 +49,7 @@ class WhiteboardConsumer(AsyncJsonWebsocketConsumer):
         if content['type'] == 'new_data':
             await set_whiteboard_data(self.class_room_id, content['data'])
         elif content['type'] == 'clear_data':
-            await set_whiteboard_data(self.class_room_id, None)
+            await set_whiteboard_data(self.class_room_id, '')
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
