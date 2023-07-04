@@ -27,6 +27,7 @@ urlpatterns = [
     path('api/messages/', include(('Messages.urls', 'Messages'), namespace='Messages')),
     path('api/documents/', include(('Documents.urls', 'Documents'), namespace='Documents')),
     path('api/whiteboard/', include(('Whiteboard.urls', 'Whiteboard'), namespace='Whiteboard')),
+    path('api/grades/', include(('Grades.urls', 'Grades'), namespace='Grades')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
