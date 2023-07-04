@@ -42,8 +42,8 @@ class GetClassRoom(APIView):
         if not classroom:
             return Response(status=HTTP_400_BAD_REQUEST)
 
-        if not Participants.objects.filter(room=classroom, user=request.user).exists():
-            return Response(status=HTTP_400_BAD_REQUEST)
+        # if not Participants.objects.filter(room=classroom, user=request.user).exists():
+        #     return Response(status=HTTP_400_BAD_REQUEST)
 
         serializer = self.serializer_class(classroom)
         return Response(serializer.data)
