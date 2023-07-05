@@ -27,7 +27,7 @@ class JwtAuthMiddleware(BaseMiddleware):
         query_string: bytes = scope['query_string']
         try:
             token = query_string.decode().split('=', 1)[1]
-        except KeyError:
+        except (KeyError, IndexError):
             token = None
         if token:
             scope['user'] = await get_user_from_token(token)
