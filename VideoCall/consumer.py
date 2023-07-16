@@ -10,24 +10,23 @@ class VideoCallConsumer(AsyncJsonWebsocketConsumer):
         self.user_id = None
 
     async def connect(self):
+        await self.accept()
         self.class_room_id = self.scope['url_route']['kwargs'].get('room_id')
         self.user_id = self.scope['url_route']['kwargs'].get('user_id')
         if not self.class_room_id:
-            return await self.close(code=4004)
+            return await self.close(code=4001)
         self.chat_room_group_name = f'videocall{self.class_room_id}'
 
         await self.channel_layer.group_add(
             self.chat_room_group_name,
             self.channel_name,
         )
-        await self.accept()
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
             self.chat_room_group_name,
             self.channel_name,
         )
-        await self.close(code=404)
 
     async def receive_json(self, content, **kwargs):
         match content['type']:

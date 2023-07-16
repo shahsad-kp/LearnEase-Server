@@ -25,8 +25,9 @@ class MessageConsumer(AsyncJsonWebsocketConsumer):
         self.class_room_id = None
 
     async def connect(self):
+        await self.accept()
         if self.scope['user'].is_anonymous:
-            await self.close(code=401)
+            await self.close(code=4001)
             return
 
         self.class_room_id = self.scope['url_route']['kwargs']['room_id']
@@ -37,14 +38,12 @@ class MessageConsumer(AsyncJsonWebsocketConsumer):
             self.room_group_name,
             self.channel_name,
         )
-        await self.accept()
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name,
         )
-        await self.close(code=404)
 
     async def receive_json(self, content, **kwargs):
         message = content['message']

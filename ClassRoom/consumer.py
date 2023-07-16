@@ -80,8 +80,9 @@ class ClassRoomConsumer(AsyncJsonWebsocketConsumer):
         self.class_room_id = None
 
     async def connect(self):
+        await self.accept()
         if self.scope['user'].is_anonymous:
-            await self.close(code=401)
+            await self.close(code=4001)
             return
         self.class_room_id = self.scope['url_route']['kwargs']['room_id']
         self.chat_room_group_name = f'classroom_{self.class_room_id}'
@@ -90,7 +91,7 @@ class ClassRoomConsumer(AsyncJsonWebsocketConsumer):
         try:
             participant = await add_participant(self.class_room_id, self.user.id)
         except KeyError:
-            await self.close(code=404)
+            await self.close(code=4004)
             return
         await self.channel_layer.group_send(
             self.chat_room_group_name,
@@ -103,7 +104,6 @@ class ClassRoomConsumer(AsyncJsonWebsocketConsumer):
             self.chat_room_group_name,
             self.channel_name,
         )
-        await self.accept()
 
     async def disconnect(self, event):
         if not self.user:
@@ -124,7 +124,7 @@ class ClassRoomConsumer(AsyncJsonWebsocketConsumer):
             await remove_participant(self.class_room_id, self.user.id)
         except KeyError:
             pass
-        await self.close(code=404)
+        await self.close()
 
     async def receive_json(self, content, **kwargs):
         match content['type']:
