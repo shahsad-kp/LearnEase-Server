@@ -7,15 +7,17 @@ class VideoCallConsumer(AsyncJsonWebsocketConsumer):
         self.channel_name = None
         self.chat_room_group_name = None
         self.class_room_id = None
-        self.user_id = None
+        self.user = None
 
     async def connect(self):
         await self.accept()
+        if self.scope['user'].is_anonymous:
+            await self.close(code=4001)
+            return
+        
         self.class_room_id = self.scope['url_route']['kwargs'].get('room_id')
-        self.user_id = self.scope['url_route']['kwargs'].get('user_id')
-        if not self.class_room_id:
-            return await self.close(code=4001)
         self.chat_room_group_name = f'videocall{self.class_room_id}'
+        self.user = self.scope['user']
 
         await self.channel_layer.group_add(
             self.chat_room_group_name,
@@ -31,46 +33,46 @@ class VideoCallConsumer(AsyncJsonWebsocketConsumer):
     async def receive_json(self, content, **kwargs):
         match content['type']:
             case 'join':
-                print(f'user {self.user_id} join room {self.class_room_id}')
+                print(f'user {self.user.id} join room {self.class_room_id}')
                 await self.channel_layer.group_send(
                     self.chat_room_group_name,
                     {
                         'type': 'join_student',
-                        'from': self.user_id,
+                        'from': self.user.id,
                     }
                 )
 
             case 'offer':
-                print(f'user {self.user_id} send offer to {content["userId"]}')
+                print(f'user {self.user.id} send offer to {content["userId"]}')
                 await self.channel_layer.group_send(
                     self.chat_room_group_name,
                     {
                         'type': 'offer',
-                        'from': self.user_id,
+                        'from': self.user.id,
                         'to': content['userId'],
                         'offer': content['offer'],
                     }
                 )
 
             case 'answer':
-                print(f'user {self.user_id} send answer to {content["userId"]}')
+                print(f'user {self.user.id} send answer to {content["userId"]}')
                 await self.channel_layer.group_send(
                     self.chat_room_group_name,
                     {
                         'type': 'answer',
-                        'from': self.user_id,
+                        'from': self.user.id,
                         'to': content['userId'],
                         'answer': content['answer'],
                     }
                 )
 
             case 'ice-candidate':
-                print(f'user {self.user_id} send ice candidate to {content["userId"]}')
+                print(f'user {self.user.id} send ice candidate to {content["userId"]}')
                 await self.channel_layer.group_send(
                     self.chat_room_group_name,
                     {
                         'type': 'ice_candidate',
-                        'from': self.user_id,
+                        'from': self.user.id,
                         'to': content['userId'],
                         'candidate': content['candidate'],
                     }
@@ -80,7 +82,7 @@ class VideoCallConsumer(AsyncJsonWebsocketConsumer):
                 pass
 
     async def join_student(self, event):
-        if event['from'] == self.user_id: return
+        if event['from'] == self.user.id: return
         await self.send_json(
             {
                 'type': 'request-connection',
@@ -90,7 +92,7 @@ class VideoCallConsumer(AsyncJsonWebsocketConsumer):
         print(f'sended request to {event["from"]}')
 
     async def offer(self, event):
-        if event['to'] != self.user_id:
+        if event['to'] != self.user.id:
             return
         await self.send_json(
             {
@@ -102,7 +104,7 @@ class VideoCallConsumer(AsyncJsonWebsocketConsumer):
         print(f'sended offer to {event["from"]}')
 
     async def answer(self, event):
-        if event['to'] != self.user_id:
+        if event['to'] != self.user.id:
             return
         await self.send_json(
             {
@@ -114,7 +116,7 @@ class VideoCallConsumer(AsyncJsonWebsocketConsumer):
         print(f'sended answer to {event["from"]}')
 
     async def ice_candidate(self, event):
-        if event['to'] != self.user_id:
+        if event['to'] != self.user.id:
             return
         await self.send_json(
             {
