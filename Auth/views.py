@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK, HTTP_401_UNAUTHORIZED
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from Auth.serializer import OTPSerializer
 
 from Users.models import User
 from Users.serializers import UserSerializer
@@ -47,6 +48,25 @@ class UserRegisterView(CreateAPIView):
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        if response.status_code == 201:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid()
+            user = User.objects.get(email=serializer.data['email'])
+            refresh = RefreshToken.for_user(user)
+            data = {
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'user': UserSerializer(user).data
+            }
+            response.data = data
+        return response
+    
+class OtpVerification(CreateAPIView):
+    serializer_class = OTPSerializer
+    permission_classes = [AllowAny]
+    
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
         if response.status_code == 201:
