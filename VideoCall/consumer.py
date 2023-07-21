@@ -14,107 +14,51 @@ class VideoCallConsumer(AsyncJsonWebsocketConsumer):
         if self.scope['user'].is_anonymous:
             await self.close(code=4001)
             return
-        
+
         self.class_room_id = self.scope['url_route']['kwargs'].get('room_id')
         self.chat_room_group_name = f'videocall{self.class_room_id}'
         self.user = self.scope['user']
 
-        await self.channel_layer.group_add(
-            self.chat_room_group_name,
-            self.channel_name,
-        )
+        await self.channel_layer.group_add(self.chat_room_group_name, self.channel_name, )
 
     async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(
-            self.chat_room_group_name,
-            self.channel_name,
-        )
+        await self.channel_layer.group_discard(self.chat_room_group_name, self.channel_name, )
 
     async def receive_json(self, content, **kwargs):
-        match content['type']:
-            case 'join':
-                                await self.channel_layer.group_send(
-                    self.chat_room_group_name,
-                    {
-                        'type': 'join_student',
-                        'from': self.user.id,
-                    }
-                )
+        if content['type'] == 'join':
+            await self.channel_layer.group_send(self.chat_room_group_name,
+                                                {'type': 'join_student', 'from': self.user.id, })
 
-            case 'offer':
-                                await self.channel_layer.group_send(
-                    self.chat_room_group_name,
-                    {
-                        'type': 'offer',
-                        'from': self.user.id,
-                        'to': content['userId'],
-                        'offer': content['offer'],
-                    }
-                )
+        elif content['type'] == 'offer':
+            await self.channel_layer.group_send(self.chat_room_group_name,
+                                                {'type': 'offer', 'from': self.user.id, 'to': content['userId'],
+                                                 'offer': content['offer'], })
 
-            case 'answer':
-                                await self.channel_layer.group_send(
-                    self.chat_room_group_name,
-                    {
-                        'type': 'answer',
-                        'from': self.user.id,
-                        'to': content['userId'],
-                        'answer': content['answer'],
-                    }
-                )
+        elif content['type'] == 'answer':
+            await self.channel_layer.group_send(self.chat_room_group_name,
+                                                {'type': 'answer', 'from': self.user.id, 'to': content['userId'],
+                                                 'answer': content['answer'], })
 
-            case 'ice-candidate':
-                                await self.channel_layer.group_send(
-                    self.chat_room_group_name,
-                    {
-                        'type': 'ice_candidate',
-                        'from': self.user.id,
-                        'to': content['userId'],
-                        'candidate': content['candidate'],
-                    }
-                )
-
-            case _:
-                pass
+        elif content['type'] == 'ice-candidate':
+            await self.channel_layer.group_send(self.chat_room_group_name,
+                                                {'type': 'ice_candidate', 'from': self.user.id, 'to': content['userId'],
+                                                 'candidate': content['candidate'], })
 
     async def join_student(self, event):
         if event['from'] == self.user.id: return
-        await self.send_json(
-            {
-                'type': 'request-connection',
-                'userId': event['from'],
-            }
-        )
+        await self.send_json({'type': 'request-connection', 'userId': event['from'], })
 
     async def offer(self, event):
         if event['to'] != self.user.id:
             return
-        await self.send_json(
-            {
-                'type': 'offer',
-                'userId': event['from'],
-                'offer': event['offer'],
-            }
-        )
+        await self.send_json({'type': 'offer', 'userId': event['from'], 'offer': event['offer'], })
 
     async def answer(self, event):
         if event['to'] != self.user.id:
             return
-        await self.send_json(
-            {
-                'type': 'answer',
-                'userId': event['from'],
-                'answer': event['answer'],
-            }
-        )
+        await self.send_json({'type': 'answer', 'userId': event['from'], 'answer': event['answer'], })
 
     async def ice_candidate(self, event):
         if event['to'] != self.user.id:
             return
-        await self.send_json(
-            {
-                'type': 'ice-candidate',
-                'userId': event['from'],
-                'candidate': event['candidate'],
-            }
-        )
+        await self.send_json({'type': 'ice-candidate', 'userId': event['from'], 'candidate': event['candidate'], })
