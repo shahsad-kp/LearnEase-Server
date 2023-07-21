@@ -14,11 +14,15 @@ from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.security.websocket import OriginValidator
 from django.contrib.staticfiles.handlers import ASGIStaticFilesHandler
 from django.core.asgi import get_asgi_application
+from environ import environ
 
 from Auth.middleware import JwtAuthMiddlewareStack
 from learn_ease_backend.routing import websocket_urlpatterns
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'learn_ease_backend.settings')
+
+env = environ.Env()
+environ.Env.read_env()
 
 application = ProtocolTypeRouter(
     {
@@ -29,7 +33,7 @@ application = ProtocolTypeRouter(
                     routes=websocket_urlpatterns
                 )
             ),
-            ['localhost:5173', '10.4.2.254:5173', '*']
+            env('CORS_WHITELIST', default='').split(',')
         )
     }
 )
