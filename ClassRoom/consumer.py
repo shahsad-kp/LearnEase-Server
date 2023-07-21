@@ -133,7 +133,7 @@ class ClassRoomConsumer(AsyncJsonWebsocketConsumer):
                     audio = content['audio']
                     video = content['video']
                 except KeyError:
-                                        return
+                    return
                 new_settings = await change_settings(self.user.id, self.class_room_id, audio, video)
                 await self.channel_layer.group_send(
                     self.chat_room_group_name,
