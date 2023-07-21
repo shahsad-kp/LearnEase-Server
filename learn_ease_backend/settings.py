@@ -25,12 +25,12 @@ env = environ.Env()
 environ.Env.read_env()
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-$-6lkpx0!y_%)9ezcc8&year%+v5xv(*87p!m+6y_dn(bctj@i'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [env('ALLOWED_HOSTS').split(',')]
 
 # Application definition
 
@@ -126,10 +126,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 CORS_ORIGIN_ALLOW_ALL = False
-CORS_ORIGIN_WHITELIST = (
-  'http://localhost:5173',
-  'http://10.4.2.254:5173'
-)
+CORS_ORIGIN_WHITELIST = (env('CORS_WHITELIST').split(','))
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=1),
