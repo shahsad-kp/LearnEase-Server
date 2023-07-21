@@ -93,33 +93,17 @@ class ClassRoomConsumer(AsyncJsonWebsocketConsumer):
         except KeyError:
             await self.close(code=4004)
             return
-        await self.channel_layer.group_send(
-            self.chat_room_group_name,
-            {
-                'type': 'join_student',
-                'student': participant,
-            }
-        )
-        await self.channel_layer.group_add(
-            self.chat_room_group_name,
-            self.channel_name,
-        )
+        await self.channel_layer.group_send(self.chat_room_group_name,
+                                            {'type': 'join_student', 'student': participant, })
+        await self.channel_layer.group_add(self.chat_room_group_name, self.channel_name, )
 
     async def disconnect(self, event):
         if not self.user:
             return
 
-        await self.channel_layer.group_send(
-            self.chat_room_group_name,
-            {
-                'type': 'leave_student',
-                'student_id': self.user.id,
-            }
-        )
-        await self.channel_layer.group_discard(
-            self.chat_room_group_name,
-            self.channel_name,
-        )
+        await self.channel_layer.group_send(self.chat_room_group_name,
+                                            {'type': 'leave_student', 'student_id': self.user.id, })
+        await self.channel_layer.group_discard(self.chat_room_group_name, self.channel_name, )
         try:
             await remove_participant(self.class_room_id, self.user.id)
         except KeyError:
@@ -127,70 +111,35 @@ class ClassRoomConsumer(AsyncJsonWebsocketConsumer):
         await self.close()
 
     async def receive_json(self, content, **kwargs):
-        match content['type']:
-            case 'change_settings':
-                try:
-                    audio = content['audio']
-                    video = content['video']
-                except KeyError:
-                    return
-                new_settings = await change_settings(self.user.id, self.class_room_id, audio, video)
-                await self.channel_layer.group_send(
-                    self.chat_room_group_name,
-                    {
-                        'type': 'change_settings',
-                        'user_id': self.user.id,
-                        'settings': new_settings,
-                    }
-                )
-            case 'change_permission':
-                target_user_id = content['user_id']
-                permissions = content['permission']
-                audio = permissions.get('audio')
-                video = permissions.get('video')
-                try:
-                    new_settings = await change_permissions(
-                        self.user.id,
-                        target_user_id,
-                        self.class_room_id,
-                        audio,
-                        video
-                    )
-                except [KeyError, PermissionError]:
-                    return
-                await self.channel_layer.group_send(
-                    self.chat_room_group_name,
-                    {
-                        'type': 'change_settings',
-                        'user_id': target_user_id,
-                        'settings': new_settings,
-                    }
-                )
-
-            case _:
-                pass
+        if content['type'] == 'change_settings':
+            try:
+                audio = content['audio']
+                video = content['video']
+            except KeyError:
+                return
+            new_settings = await change_settings(self.user.id, self.class_room_id, audio, video)
+            await self.channel_layer.group_send(self.chat_room_group_name,
+                                                {'type': 'change_settings',
+                                                 'user_id': self.user.id,
+                                                 'settings': new_settings, })
+        elif content['type'] == 'change_permission':
+            target_user_id = content['user_id']
+            permissions = content['permission']
+            audio = permissions.get('audio')
+            video = permissions.get('video')
+            try:
+                new_settings = await change_permissions(self.user.id, target_user_id, self.class_room_id, audio, video)
+            except [KeyError, PermissionError]:
+                return
+            await self.channel_layer.group_send(self.chat_room_group_name,
+                                                {'type': 'change_settings', 'user_id': target_user_id,
+                                                 'settings': new_settings, })
 
     async def join_student(self, event):
-        await self.send_json(
-            {
-                'type': 'join_student',
-                'student': event['student']
-            }
-        )
+        await self.send_json({'type': 'join_student', 'student': event['student']})
 
     async def leave_student(self, event):
-        await self.send_json(
-            {
-                'type': 'leave_student',
-                'student_id': event['student_id']
-            }
-        )
+        await self.send_json({'type': 'leave_student', 'student_id': event['student_id']})
 
     async def change_settings(self, event):
-        await self.send_json(
-            {
-                'type': 'change_settings',
-                'user_id': event['user_id'],
-                'settings': event['settings'],
-            }
-        )
+        await self.send_json({'type': 'change_settings', 'user_id': event['user_id'], 'settings': event['settings'], })
