@@ -7,5 +7,4 @@ from ClassRoom.models import Participants, ParticipantRoomSettings
 @receiver(post_save, sender=Participants)
 def create_participant_room_settings(sender, instance, created, **kwargs):
     if created:
-        print('ParticipantRoomSettings created')
-        ParticipantRoomSettings.objects.create(participant=instance)
+                ParticipantRoomSettings.objects.create(participant=instance)

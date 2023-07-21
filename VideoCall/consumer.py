@@ -33,8 +33,7 @@ class VideoCallConsumer(AsyncJsonWebsocketConsumer):
     async def receive_json(self, content, **kwargs):
         match content['type']:
             case 'join':
-                print(f'user {self.user.id} join room {self.class_room_id}')
-                await self.channel_layer.group_send(
+                                await self.channel_layer.group_send(
                     self.chat_room_group_name,
                     {
                         'type': 'join_student',
@@ -43,8 +42,7 @@ class VideoCallConsumer(AsyncJsonWebsocketConsumer):
                 )
 
             case 'offer':
-                print(f'user {self.user.id} send offer to {content["userId"]}')
-                await self.channel_layer.group_send(
+                                await self.channel_layer.group_send(
                     self.chat_room_group_name,
                     {
                         'type': 'offer',
@@ -55,8 +53,7 @@ class VideoCallConsumer(AsyncJsonWebsocketConsumer):
                 )
 
             case 'answer':
-                print(f'user {self.user.id} send answer to {content["userId"]}')
-                await self.channel_layer.group_send(
+                                await self.channel_layer.group_send(
                     self.chat_room_group_name,
                     {
                         'type': 'answer',
@@ -67,8 +64,7 @@ class VideoCallConsumer(AsyncJsonWebsocketConsumer):
                 )
 
             case 'ice-candidate':
-                print(f'user {self.user.id} send ice candidate to {content["userId"]}')
-                await self.channel_layer.group_send(
+                                await self.channel_layer.group_send(
                     self.chat_room_group_name,
                     {
                         'type': 'ice_candidate',
@@ -89,7 +85,6 @@ class VideoCallConsumer(AsyncJsonWebsocketConsumer):
                 'userId': event['from'],
             }
         )
-        print(f'sended request to {event["from"]}')
 
     async def offer(self, event):
         if event['to'] != self.user.id:
@@ -101,7 +96,6 @@ class VideoCallConsumer(AsyncJsonWebsocketConsumer):
                 'offer': event['offer'],
             }
         )
-        print(f'sended offer to {event["from"]}')
 
     async def answer(self, event):
         if event['to'] != self.user.id:
@@ -113,7 +107,6 @@ class VideoCallConsumer(AsyncJsonWebsocketConsumer):
                 'answer': event['answer'],
             }
         )
-        print(f'sended answer to {event["from"]}')
 
     async def ice_candidate(self, event):
         if event['to'] != self.user.id:
@@ -125,4 +118,3 @@ class VideoCallConsumer(AsyncJsonWebsocketConsumer):
                 'candidate': event['candidate'],
             }
         )
-        print(f'sended ice-candidate to {event["from"]}')

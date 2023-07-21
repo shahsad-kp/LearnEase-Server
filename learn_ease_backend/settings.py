@@ -128,6 +128,7 @@ AUTH_PASSWORD_VALIDATORS = [
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_WHITELIST = (
   'http://localhost:5173',
+  'http://10.4.2.254:5173'
 )
 
 SIMPLE_JWT = {

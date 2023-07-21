@@ -29,7 +29,7 @@ application = ProtocolTypeRouter(
                     routes=websocket_urlpatterns
                 )
             ),
-            ['localhost:5173', '*']
+            ['localhost:5173', '10.4.2.254:5173', '*']
         )
     }
 )

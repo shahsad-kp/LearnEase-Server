@@ -129,8 +129,11 @@ class ClassRoomConsumer(AsyncJsonWebsocketConsumer):
     async def receive_json(self, content, **kwargs):
         match content['type']:
             case 'change_settings':
-                audio = content['audio']
-                video = content['video']
+                try:
+                    audio = content['audio']
+                    video = content['video']
+                except KeyError:
+                                        return
                 new_settings = await change_settings(self.user.id, self.class_room_id, audio, video)
                 await self.channel_layer.group_send(
                     self.chat_room_group_name,
@@ -165,7 +168,7 @@ class ClassRoomConsumer(AsyncJsonWebsocketConsumer):
                 )
 
             case _:
-                print('unknown message type', content['type'])
+                pass
 
     async def join_student(self, event):
         await self.send_json(
