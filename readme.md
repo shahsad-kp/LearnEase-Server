@@ -55,7 +55,7 @@ pip install -r requirements.txt
 ```
 
 #### 5 Environment Variables:
-- Refer for setting up the required environment variables for the LearnEase backend.
+d- Refer [environment variables](https://github.com/shahsad-kp/LearnEase-Server#environment-variables) for setting up the required environment variables for the LearnEase backend.
 
 
 #### 6 Apply Database Migrations:
@@ -63,6 +63,7 @@ pip install -r requirements.txt
 ```bash
 python manage.py migrate
 ```
+
 #### 7 Start the Daphne Server:
 - Run the following command to start the Daphne server with Channels:
 ```bash
@@ -71,9 +72,10 @@ daphne learn_ease_backend.asgi:application
 - The backend application will be accessible at http://localhost:8000 (or another available port if 8000 is already in use).
 
 That's it! You're all set to run the backend of LearnEase with Django, Daphne, Channels, and Postgres. Integrate this backend with the frontend to create a complete virtual classroom experience. Happy teaching and learning! 🚀📚
+
 ## Environment Variables
 
-To run this project, you will need to add the following environment variables to your .env file
+To run this project, you will need to add the following environment variables to your .env file and store it settings folder:
 
 `SECRET_KEY`
 
