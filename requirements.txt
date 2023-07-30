@@ -13,3 +13,5 @@ django-cors-headers==4.1.0
 channels==4.0.0
 daphne==4.0.0
 channels-redis==4.1.0
+django-storages[google]==1.13.2
+google-cloud-storage

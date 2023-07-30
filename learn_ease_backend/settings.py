@@ -133,6 +133,11 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
+# storage settings
+if DEBUG and env('USE_GOOGLE_CLOUD_STORAGE') == 'True':
+    STORAGES = {"default": {"BACKEND": "storages.backends.gcloud.GoogleCloudStorage"}}
+    GS_BUCKET_NAME = env('GS_BUCKET_NAME')
+
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
