@@ -2,7 +2,7 @@ from rest_framework.generics import UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 
 from Users.models import User
-from Users.serializers import UserSerializer, UpdateUserSerializer
+from Users.serializers import UpdateUserSerializer
 
 
 class UpdateUserView(UpdateAPIView):

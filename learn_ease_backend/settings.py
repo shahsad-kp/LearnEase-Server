@@ -133,11 +133,6 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
-# storage settings
-if DEBUG and env('USE_GOOGLE_CLOUD_STORAGE') == 'True':
-    STORAGES = {"default": {"BACKEND": "storages.backends.gcloud.GoogleCloudStorage"}}
-    GS_BUCKET_NAME = env('GS_BUCKET_NAME')
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
@@ -162,10 +157,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'Users.User'
 
 # Media files
-if env('USE_GOOGLE_CLOUD_STORAGE', default='False') == 'True':
-    MEDIA_URL = env('MEDIA_URL')
-else:
-    MEDIA_URL = 'media/'
+MEDIA_URL = env('MEDIA_URL')
 MEDIA_ROOT = BASE_DIR / 'media'
 
 CHANNEL_LAYERS = {
