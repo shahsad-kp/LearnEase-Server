@@ -162,7 +162,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'Users.User'
 
 # Media files
-if env('USE_GOOGLE_CLOUD_STORAGE') == 'True':
+if env('USE_GOOGLE_CLOUD_STORAGE', default='False') == 'True':
     MEDIA_URL = env('MEDIA_URL')
 else:
     MEDIA_URL = 'media/'
