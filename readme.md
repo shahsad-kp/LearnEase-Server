@@ -1,7 +1,7 @@
 ![Logo](https://i.ibb.co/ngwjLL5/Unsastitled-2.png)
 
 
-# LearnEase - Frontend
+# LearnEase - Backend
 
 ### 🚀 About LearnEase
 _LearnEase is an innovative virtual classroom application that takes video conferencing to the next level! With a focus on creating an engaging and interactive learning environment, LearnEase offers a plethora of exciting features designed to enrich the teaching and learning experience._
