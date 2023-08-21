@@ -95,6 +95,12 @@ To run this project, you will need to add the following environment variables to
 
 `DEBUG`
 
+`CLOUDINARY_CLOUD_NAME`
+
+`CLOUDINARY_API_KEY`
+
+`CLOUDINARY_API_SECRET`
+
 
 ## Feedback
 
