@@ -1,8 +1,8 @@
-from asgiref.sync import sync_to_async
+from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
 
-@sync_to_async
+@database_sync_to_async
 def set_whiteboard_data(class_room_id, data):
     from Whiteboard.models import Whiteboard
     whiteboard, _ = Whiteboard.objects.update_or_create(
@@ -15,6 +15,19 @@ def set_whiteboard_data(class_room_id, data):
     whiteboard.save()
 
 
+@database_sync_to_async
+def check_is_lecturer(class_room_id, user_id):
+    from ClassRoom.models import ClassRoom
+    try:
+        class_room = ClassRoom.objects.get(id=class_room_id)
+    except ClassRoom.DoesNotExist:
+        raise KeyError
+    try:
+        return class_room.participants.get(is_lecturer=True).id == user_id
+    except Exception:
+        return False
+
+
 class WhiteboardConsumer(AsyncJsonWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -22,6 +35,7 @@ class WhiteboardConsumer(AsyncJsonWebsocketConsumer):
         self.room_group_name = None
         self.user = None
         self.class_room_id = None
+        self.is_lecturer = False
 
     async def connect(self):
         await self.accept()
@@ -32,6 +46,10 @@ class WhiteboardConsumer(AsyncJsonWebsocketConsumer):
         self.class_room_id = self.scope['url_route']['kwargs']['room_id']
         self.room_group_name = f'whiteboard{self.class_room_id}'
         self.user = self.scope['user']
+        self.is_lecturer = await check_is_lecturer(
+            class_room_id=self.class_room_id,
+            user_id=self.user.id
+        )
 
         await self.channel_layer.group_add(
             self.room_group_name,
@@ -63,6 +81,8 @@ class WhiteboardConsumer(AsyncJsonWebsocketConsumer):
 
     async def new_line(self, event):
         line = event['line']
+        if self.is_lecturer:
+            return
         await self.send_json({
             'type': 'line',
             'line': line
