@@ -95,6 +95,14 @@ To run this project, you will need to add the following environment variables to
 
 `DEBUG`
 
+`EMAIL_HOST`
+
+`EMAIL_PORT`
+
+`EMAIL_HOST_USER`
+
+`EMAIL_HOST_PASSWORD`
+
 
 ## Feedback
 
