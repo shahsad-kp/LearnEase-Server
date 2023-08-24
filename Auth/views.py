@@ -1,16 +1,13 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.tokens import default_token_generator
-from django.template.loader import render_to_string
-from django.urls import reverse
-from django.conf import settings
-from django.core.mail import send_mail
 from rest_framework.generics import CreateAPIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK, HTTP_401_UNAUTHORIZED
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from Auth.models import EmailVerification
 from Users.models import User
 from Users.serializers import UserSerializer
 
@@ -60,21 +57,7 @@ class UserRegisterView(CreateAPIView):
             user = User.objects.get(email=serializer.data['email'])
 
             token = default_token_generator.make_token(user)
-            verification_link = request.build_absolute_uri(reverse('verify_email', args=[token]))
-            subject = 'Email Verification'
-            message = render_to_string(
-                'email_verification_template.html',
-                {'verification_link': verification_link}
-            )
-            from_email = settings.EMAIL_HOST_USER
-            to_email = [user.email]
-            send_mail(
-                subject=subject,
-                message='',
-                html_message=message,
-                from_email=from_email,
-                recipient_list=to_email,
-            )
+            EmailVerification.objects.create(email=user.email, token=token).send()
 
             refresh = RefreshToken.for_user(user)
             data = {
@@ -84,3 +67,21 @@ class UserRegisterView(CreateAPIView):
             }
             response.data = data
         return response
+
+
+class VerifyEmailView(APIView):
+    """
+    View for verifying a user's email.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, token):
+        try:
+            email_verification = EmailVerification.objects.get(token=token)
+            user = User.objects.get(email=email_verification.email)
+            user.is_active = True
+            user.save()
+            email_verification.delete()
+            return Response({'detail': 'Email successfully verified.'}, status=HTTP_200_OK)
+        except EmailVerification.DoesNotExist:
+            return Response({'detail': 'Invalid token.'}, status=HTTP_400_BAD_REQUEST)
