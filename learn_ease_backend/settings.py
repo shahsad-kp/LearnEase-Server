@@ -164,6 +164,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'Users.User'
 
 FRONTEND_URL = env('FRONTEND_URL')
+VERIFICATION_URL = env('VERIFICATION_URL')
 
 # Media files
 MEDIA_URL = env('MEDIA_URL')

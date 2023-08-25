@@ -95,6 +95,10 @@ To run this project, you will need to add the following environment variables to
 
 `DEBUG`
 
+`VERIFICATION_URL`
+
+`FRONTEND_URL`
+
 `EMAIL_HOST`
 
 `EMAIL_PORT`
