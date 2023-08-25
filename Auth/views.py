@@ -75,6 +75,8 @@ class VerifyEmailView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, token):
+        if request.user.is_verified:
+            return Response({'detail': 'Email already verified.'}, status=HTTP_400_BAD_REQUEST)
         try:
             email_verification = EmailVerification.objects.get(token=token)
             user = request.user
