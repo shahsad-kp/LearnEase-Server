@@ -55,9 +55,8 @@ class UserRegisterView(CreateAPIView):
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid()
             user = User.objects.get(email=serializer.data['email'])
-
             token = default_token_generator.make_token(user)
-            EmailVerification.objects.create(email=user.email, token=token).send()
+            EmailVerification.objects.create(email=user.email, token=token, user=user).send()
 
             refresh = RefreshToken.for_user(user)
             data = {
@@ -78,8 +77,10 @@ class VerifyEmailView(APIView):
     def get(self, request, token):
         try:
             email_verification = EmailVerification.objects.get(token=token)
-            user = User.objects.get(email=email_verification.email)
-            user.is_active = True
+            user = request.user
+            if user != email_verification.user:
+                return Response({'detail': 'Invalid token.'}, status=HTTP_400_BAD_REQUEST)
+            user.is_verified = True
             user.save()
             email_verification.delete()
             return Response({'detail': 'Email successfully verified.'}, status=HTTP_200_OK)

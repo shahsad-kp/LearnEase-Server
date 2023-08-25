@@ -6,17 +6,16 @@ from Users.models import User
 
 class UserSerializer(ModelSerializer):
     profilePicture = ImageField(source='profile_pic', required=False)
-    isActive = BooleanField(source='is_active', required=False)
+    isVerified = BooleanField(source='is_verified', required=False)
 
     class Meta:
         model = User
-        fields = ['id', 'name', 'email', 'password', 'profilePicture', 'isActive']
+        fields = ['id', 'name', 'email', 'password', 'profilePicture', 'isVerified']
         extra_kwargs = {'password': {'write_only': True, 'required': True}}
 
     def create(self, validated_data):
         user = User(**validated_data)
         user.set_password(validated_data.get('password'))
-        user.is_active = False
         user.save()
         return user
 
