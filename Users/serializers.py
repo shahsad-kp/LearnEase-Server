@@ -1,6 +1,8 @@
+from django.contrib.auth.tokens import default_token_generator
 from rest_framework.fields import ImageField
 from rest_framework.serializers import ModelSerializer, BooleanField
 
+from Auth.models import EmailVerification
 from Users.models import User
 
 
@@ -34,6 +36,12 @@ class UpdateUserSerializer(ModelSerializer):
         return representation
 
     def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+
         if 'email' in validated_data and instance.email != validated_data['email']:
             instance.is_verified = False
-        return super().update(instance, validated_data)
+            instance.save()
+            token = default_token_generator.make_token(instance)
+            EmailVerification.objects.create(email=instance.email, token=token, user=instance).send()
+
+        return instance
