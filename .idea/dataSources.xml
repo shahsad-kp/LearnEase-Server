@@ -6,6 +6,24 @@
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
       <jdbc-url>jdbc:postgresql://localhost:5432/learnease</jdbc-url>
+      <jdbc-additional-properties>
+        <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />
+      </jdbc-additional-properties>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="learnease@dpg-cjhjq0b37aks73br21a0-a.oregon-postgres.render.com" uuid="50745b4c-1e72-4fff-a042-91b101683b02">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <remarks>DATABASE_NAME=learnease
+DATABASE_USERNAME=learnease
+DATABASE_PASSWORD=FsvgNc7Y8hQxNo0h6guzXV3RxEDoh6I7
+DATABASE_HOST=dpg-cjhjq0b37aks73br21a0-a.oregon-postgres.render.com
+DATABASE_PORT=5432</remarks>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://dpg-cjhjq0b37aks73br21a0-a.oregon-postgres.render.com:5432/learnease</jdbc-url>
+      <jdbc-additional-properties>
+        <property name="com.intellij.clouds.kubernetes.db.enabled" value="false" />
+      </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>

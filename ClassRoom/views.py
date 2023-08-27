@@ -1,8 +1,7 @@
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 
-from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
@@ -14,13 +13,15 @@ from ClassRoom.serializers import ClassRoomSerializer, TopicSerializer
 class CreateClassRoom(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request):
+    def post(self, request: Request):
         data = request.data.copy()
         data['lecturer'] = request.user.pk
         topics_data = data.pop('topics', [])
 
         serializer = ClassRoomSerializer(data=data)
         if serializer.is_valid():
+            if not request.user.is_verified:
+                return Response({'message': 'Please verify your email'}, status=HTTP_400_BAD_REQUEST)
             classroom = serializer.save()
             Participants.objects.create(room=classroom, user=request.user, is_lecturer=True)
             for topic_data in topics_data:
