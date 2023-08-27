@@ -46,8 +46,9 @@ class User(AbstractBaseUser):
     name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
     profile_pic = models.ImageField(upload_to='profile_pics/', default='profile_pics/default.jpg')
-    is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=False)
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['name', 'password']
     objects = UserManager()

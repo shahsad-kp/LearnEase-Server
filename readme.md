@@ -101,6 +101,17 @@ To run this project, you will need to add the following environment variables to
 
 `CLOUDINARY_API_SECRET`
 
+`VERIFICATION_URL`
+
+`FRONTEND_URL`
+
+`EMAIL_HOST`
+
+`EMAIL_PORT`
+
+`EMAIL_HOST_USER`
+
+`EMAIL_HOST_PASSWORD`
 
 ## Feedback
 
