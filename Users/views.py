@@ -15,7 +15,3 @@ class UpdateUserView(UpdateAPIView):
 
     def get_object(self):
         return self.request.user
-
-    def patch(self, request, *args, **kwargs):
-        response = super().patch(request, *args, **kwargs)
-        return response
